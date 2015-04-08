@@ -40,6 +40,100 @@ var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
 
+var LAYER_COUNT = 3;
+var MAP = {tw:60, th:15};//set these to how big your map was
+var TILE= 35; 
+var TILESET_TILE = 70;
+var TILESET_PADDING = 2;
+var TILESET_SPACING = 2;
+var TILESET_COUNT_X = 14;
+var TILESET_COUNT_Y = 14;
+
+var tileset = document.createElement("img");
+tileset.src = "tileset.png";
+
+var cells = [];
+
+function initializeCollision()
+{
+	for ( var layerIdx = 0 ; layerIdx < LAYER_COUNT ; ++layerIdx )
+	{
+		cells[layerIdx] = [];
+		var idx = 0;
+		
+		for ( var y = 0 ; y < level1.layers[layerIdx].height ; ++y)
+		{
+			cells[layerIdx][y] = [];
+			
+			
+			for ( var x = 0 ; x < level1.layers[layerIdx].height ; ++x)
+			{
+				if (level1.layers[layerIdx].data[idx] !=0 )
+				{
+					cells[layerIdx][y][x] = 1;
+					cells[layerIdx][y][x+1] = 1;
+					cells[layerIdx][y-1][x+1] = 1;
+					cells[layerIdx][y-1][x] = 1;
+				}
+				else if (cells[layerIdx][y][x] !=1)
+				{
+					
+				}
+				++idx;
+			}
+		}
+	}
+}
+
+function tileToPixel(tile_coord)
+{
+	return tile_coord * TILE;
+};
+function pixelToTile(pixel)
+{
+	return Math.floor(pixel/TILE);
+};
+
+function drawMap()
+{	
+//this layer renders over all the layers in our tilemap
+	for (var layerIdx = 0 ; layerIdx < LAYER_COUNT ; ++layerIdx )
+	{
+	//render everything in the current layer (LayerIdx)
+	
+	//look at every tile in the layer in turn, and render them
+	var idx = 0;
+	//look at each row
+		for (var y = 0 ; y < level1.layers[layerIdx].height ; ++x)
+		{
+		//look at each tile in our row
+			for (var y = 0 ; y < level1.layers[layerIdx].width ; ++x)
+			{
+				var tileIndex = level1.layers[layerIdx].data[idx] - 1;
+				
+				if ( tileIndex != -1 )
+				{
+				//draw the current tilemap at the current location 
+				//
+				
+				var sx = TILESET_PADDING + (tileIndex % TILESET_COUNT_X) *
+										   (TILESET_TILE + TILESET_SPACING);
+				//source y in the tilest						   
+				var sy  = TILESET_PADDING + (math.floor(tileIndex /TILESET_COUNT_X)) *
+										   (TILESET_TILE + TILESET_SPACING);
+				//destination x on the canvas						   
+				var dx = x * TILE;
+				//destination y on the canvas
+				var dy = (y-1) * TILE;
+					context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE,
+											   dx, dy, TILESET_TILE, TILESET_TILE);
+				}
+			}
+			++idx;
+		}
+	}
+}
+
 // load an image to draw
 //var chuckNorris = document.createElement("img");
 //chuckNorris.src = "hero.png";
@@ -58,8 +152,7 @@ function run()
 	
 	//context.drawImage(chuckNorris, SCREEN_WIDTH/6 - chuckNorris.width/2, SCREEN_HEIGHT/2 - chuckNorris.height/2);
 	player.update(deltaTime);
-	player.draw();
-		
+	player.draw;
 	// update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;

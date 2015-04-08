@@ -8,7 +8,7 @@ Vector2.prototype.length = function()
 	length = x*x + y*y;
 }
 
-Vector2.prototype.add =function()
+Vector2.prototype.add =function(other_vector)
 {
 	var result = new Vector2();
 	
@@ -25,7 +25,7 @@ Vector2.prototype.normalize = function()
 	
 	var length = Math.sqrt (x*x + y*y);
 }
-
+  
 Vector2.prototype.multiplyscalar = function( scalar )
 {
 	var result = new Vector2();
@@ -55,3 +55,14 @@ Vector2.prototype.normalize = function()
 	return result;
 }
 
+
+Vector2.prototype.set = function(x ,y )
+{
+
+	var result = new Vector2();
+	
+	result.x = this.x + x;
+	result.y = this.y + y;
+	
+	return result;
+}
