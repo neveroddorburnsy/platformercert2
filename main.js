@@ -1,6 +1,7 @@
 var canvas = document.getElementById("gameCanvas");
 var context = canvas.getContext("2d");
 
+//setting up delta time variables
 var startFrameMillis = Date.now();
 var endFrameMillis = Date.now();
 
@@ -41,44 +42,61 @@ var fpsCount = 0;
 var fpsTime = 0;
 
 var LAYER_COUNT = 3;
-var MAP = {tw:60, th:15};//set these to how big your map was
-var TILE= 35; 
+
+//SET THESE TO HOW BIG YOUR MAP IS tw is width and th is height
+var MAP = { tw:100, th:100 }; 
+
+var TILE = 35;
 var TILESET_TILE = 70;
 var TILESET_PADDING = 2;
 var TILESET_SPACING = 2;
 var TILESET_COUNT_X = 14;
 var TILESET_COUNT_Y = 14;
 
+var LAYER_BACKGROUND = 0;
+var LAYER_PLATFORMS = 1;
+var LAYER_LADDERS = 2;
+
+
+
 var tileset = document.createElement("img");
 tileset.src = "tileset.png";
+
 
 var cells = [];
 
 function initializeCollision()
 {
+	//loop through each layer
 	for ( var layerIdx = 0 ; layerIdx < LAYER_COUNT ; ++layerIdx )
 	{
 		cells[layerIdx] = [];
 		var idx = 0;
-		
-		for ( var y = 0 ; y < level1.layers[layerIdx].height ; ++y)
+	
+		//loop through each row
+		for ( var y = 0 ; y < level2.layers[layerIdx].height ; ++y)
 		{
 			cells[layerIdx][y] = [];
-			
-			
-			for ( var x = 0 ; x < level1.layers[layerIdx].height ; ++x)
+		
+			//loop through each cell
+			for ( var x = 0 ; x < level2.layers[layerIdx].width ; ++x)
 			{
-				if (level1.layers[layerIdx].data[idx] !=0 )
+				//if the tile for this cell is not empty
+				if ( level2.layers[layerIdx].data[idx] != 0 )
 				{
+					//set the 4 cells around it to be colliders
 					cells[layerIdx][y][x] = 1;
 					cells[layerIdx][y][x+1] = 1;
 					cells[layerIdx][y-1][x+1] = 1;
 					cells[layerIdx][y-1][x] = 1;
 				}
-				else if (cells[layerIdx][y][x] !=1)
+				
+				//if the cell hasn't already been set to 1, set it to 0
+				else if (cells[layerIdx][y][x] != 1 )
 				{
-					
+					cells[layerIdx][y][x] = 0;
 				}
+				
 				++idx;
 			}
 		}
@@ -88,60 +106,92 @@ function initializeCollision()
 function tileToPixel(tile_coord)
 {
 	return tile_coord * TILE;
-};
+}
+
 function pixelToTile(pixel)
 {
-	return Math.floor(pixel/TILE);
-};
+	return Math.floor(pixel / TILE);
+}
+
+
+function cellAtTileCoord(layer, tx, ty)
+{
+	//if off the top, left or right of the map
+	if ( tx < 0 || tx > MAP.tw || ty < 0 )
+	{
+		return 1;
+	}
+	
+	//if off the bottom of the map
+	if ( ty >= MAP.th )
+	{
+		return 0;
+	}
+	
+	return cells[layer][ty][tx];
+}
+
+function cellAtPixelCoord(layer, x, y)
+{
+	var tx = pixelToTile(x);
+	var ty = pixelToTile(y);
+	
+	return cellAtTileCoord(layer, tx, ty);
+}
 
 function drawMap()
-{	
-//this layer renders over all the layers in our tilemap
+{
+	if (typeof(level2) === "undefined" )
+	{
+		alert("ADD 'level2' TO JSON FILE");
+	}
+
+
+	//this loops over all the layers in our tilemap
 	for (var layerIdx = 0 ; layerIdx < LAYER_COUNT ; ++layerIdx )
 	{
-	//render everything in the current layer (LayerIdx)
-	
-	//look at every tile in the layer in turn, and render them
-	var idx = 0;
-	//look at each row
-		for (var y = 0 ; y < level1.layers[layerIdx].height ; ++x)
+		//render everything in the current layer (layerIdx)
+		//look at every tile in the layer in turn, and render them.
+		
+		var idx = 0;
+		//look at each row
+		for (var y = 0 ; y < level2.layers[layerIdx].height ; ++y)
 		{
-		//look at each tile in our row
-			for (var y = 0 ; y < level1.layers[layerIdx].width ; ++x)
+			//look at each tile in the row
+			for ( var x = 0 ; x < level2.layers[layerIdx].width ; ++x)
 			{
-				var tileIndex = level1.layers[layerIdx].data[idx] - 1;
+				var tileIndex = level2.layers[layerIdx].data[idx] - 1;
 				
+				//if there's actually a tile here
 				if ( tileIndex != -1 )
 				{
-				//draw the current tilemap at the current location 
-				//
-				
-				var sx = TILESET_PADDING + (tileIndex % TILESET_COUNT_X) *
-										   (TILESET_TILE + TILESET_SPACING);
-				//source y in the tilest						   
-				var sy  = TILESET_PADDING + (math.floor(tileIndex /TILESET_COUNT_X)) *
-										   (TILESET_TILE + TILESET_SPACING);
-				//destination x on the canvas						   
-				var dx = x * TILE;
-				//destination y on the canvas
-				var dy = (y-1) * TILE;
-					context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE,
+					//draw the current tile at the current location
+					
+					//where in the tilemap is the current tile?
+					//where in the world should the current tile go?
+					
+					//source x in the tileset
+					var sx = TILESET_PADDING + (tileIndex % TILESET_COUNT_X) * 
+												(TILESET_TILE + TILESET_SPACING);
+					//source y in the tileset
+					var sy = TILESET_PADDING + (Math.floor(tileIndex / TILESET_COUNT_X)) * 
+												(TILESET_TILE + TILESET_SPACING);
+					//destination x on the canvas
+					var dx = x * TILE;
+					//destination y on the canvas
+					var dy = (y-1) * TILE;
+					
+					context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE, 
 											   dx, dy, TILESET_TILE, TILESET_TILE);
 				}
+				++idx;
 			}
-			++idx;
 		}
 	}
 }
 
-// load an image to draw
-//var chuckNorris = document.createElement("img");
-//chuckNorris.src = "hero.png";
-
-//ADDED THESE LINES
 var keyboard = new Keyboard();
 var player = new Player();
-
 
 function run()
 {
@@ -150,9 +200,13 @@ function run()
 	
 	var deltaTime = getDeltaTime();
 	
-	//context.drawImage(chuckNorris, SCREEN_WIDTH/6 - chuckNorris.width/2, SCREEN_HEIGHT/2 - chuckNorris.height/2);
+	drawMap();
+	
 	player.update(deltaTime);
-	player.draw;
+	player.draw();
+	
+	
+		
 	// update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;
@@ -169,6 +223,8 @@ function run()
 	context.fillText("FPS: " + fps, 5, 20, 100);
 }
 
+
+initializeCollision();
 
 //-------------------- Don't modify anything below here
 

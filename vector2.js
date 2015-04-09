@@ -1,49 +1,51 @@
+//CONSTRUCTOR FUNCTION
 var Vector2 = function()
 {
 	this.x = 0;
 	this.y = 0;
 }
-Vector2.prototype.length = function()
-{
-	length = x*x + y*y;
-}
 
-Vector2.prototype.add =function(other_vector)
+//ADDITION FUNCTION
+Vector2.prototype.add = function( other_vector )
 {
 	var result = new Vector2();
-	
+
 	result.x = this.x + other_vector.x;
 	result.y = this.y + other_vector.y;
 	
 	return result;
 }
 
-Vector2.prototype.normalize = function()
-{
-	var x = 250;
-	var y = 160;
-	
-	var length = Math.sqrt (x*x + y*y);
-}
-  
-Vector2.prototype.multiplyscalar = function( scalar )
+//SUBTRACT FUNCTION
+Vector2.prototype.subtract = function( other_vector )
 {
 	var result = new Vector2();
 	
-	results.x = this.x * scalar;
-	results.y = this.y * scalar;
+	result.x = this.x - other_vector.x;
+	result.y = this.y - other_vector.y;
 	
 	return result;
 }
 
-
-Vector2.prototype.length = function()
+//MULTIPLY SCALAR
+Vector2.prototype.multiplyScalar = function( scalar )
 {
-	//sprt (x*x + y*y)
-	var result = Math.sqrt(this.x *this.x * this.y * this.y);
+	var result = new Vector2();
+	
+	result.x = this.x * scalar;
+	result.y = this.y * scalar;
+	
 	return result;
 }
 
+//LENGTH FUNCTION
+Vector2.prototype.length = function()
+{
+	var result = Math.sqrt(this.x * this.x + this.y * this.y);
+	return result;
+}
+
+//NORMALIZE FUNCTION
 Vector2.prototype.normalize = function()
 {
 	var len = this.length();
@@ -55,14 +57,9 @@ Vector2.prototype.normalize = function()
 	return result;
 }
 
-
-Vector2.prototype.set = function(x ,y )
+//SET HELPER
+Vector2.prototype.set = function(x, y)
 {
-
-	var result = new Vector2();
-	
-	result.x = this.x + x;
-	result.y = this.y + y;
-	
-	return result;
+	this.x = x;
+	this.y = y;
 }
