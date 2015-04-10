@@ -33,9 +33,11 @@ var Player = function()
 	}
 		
 	this.position = new Vector2();
-	this.position.set( 16 * TILE, 16 *TILE);
+	this.position.set( 16 * TILE, 25 *TILE);
 	
 	this.velocity = new Vector2();
+	
+	this.health = 100;
 	
 	this.width = 159;
 	this.height = 163;
@@ -48,10 +50,6 @@ var Player = function()
 Player.prototype.update = function(deltaTime)
 {
 	this.sprite.update(deltaTime);
-	
-
-	
-	
 
 	var acceleration = new Vector2();
 	var playerAccel = 6000;
@@ -91,8 +89,7 @@ Player.prototype.update = function(deltaTime)
 				this.sprite.setAnimation(ANIM_IDLE_RIGHT);
 		}
 	}
-	
-	
+
 	if (this.velocity.y > 0)
 	{
 		this.falling = true;
@@ -189,5 +186,31 @@ Player.prototype.update = function(deltaTime)
 
 Player.prototype.draw = function()
 {
-	this.sprite.draw(context, this.position.x, this.position.y);
+	var tileX = pixelToTile(player.position.x);
+	var offsetX = TILE + Math.floor(player.position.x%TILE);
+	
+	var maxTiles = Math.floor(SCREEN_WIDTH / TILE) + 2;
+	startX = tileX - Math.floor(maxTiles / 2);
+	if(startX < -1)
+	{
+		startX = 0;
+		offsetX = 0;
+	}
+	if(startX > MAP.tw - maxTiles)
+	{
+		startX = MAP.tw - maxTiles + 1;
+		offsetX = TILE;
+	}
+	
+	worldOffsetX = startX * TILE + offsetX;
+	this.sprite.draw(context, this.position.x- worldOffsetX, this.position.y);
+
+	context.fillStyle = "black";
+	context.font = "64px MS Gothic";
+	var textToDisplay = "HP: " + this.health;
+	context.fillText(textToDisplay, canvas.width - 1400,285)
 }
+
+
+
+

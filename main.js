@@ -1,6 +1,15 @@
 var canvas = document.getElementById("gameCanvas");
 var context = canvas.getContext("2d");
 
+var HUD = function()
+{
+	this.image = document.createElement("img");
+	this.image.src = "HUD.png"
+	context.drawImage(this.image, 100, 100);
+	this.position = new Vector2();
+	this.velocity = new Vector2();
+}
+
 //setting up delta time variables
 var startFrameMillis = Date.now();
 var endFrameMillis = Date.now();
@@ -145,6 +154,25 @@ function drawMap()
 	{
 		alert("ADD 'level2' TO JSON FILE");
 	}
+	var startX = -1;
+	var maxTiles = Math.floor(SCREEN_WIDTH / TILE) + 2;
+	var tileX = pixelToTile(player.position.x);
+	var offsetX = TILE + Math.floor(player.position.x%TILE);
+
+	startX = tileX - Math.floor(maxTiles / 2);
+
+	 if(startX < -1)
+	 {
+		startX = 0;
+		offsetX = 0;
+	 }
+	 if(startX > MAP.tw - maxTiles)
+	 {
+		startX = MAP.tw - maxTiles + 1;
+		offsetX = TILE;
+	 }
+		worldOffsetX = startX * TILE + offsetX;
+
 
 
 	//this loops over all the layers in our tilemap
@@ -181,9 +209,11 @@ function drawMap()
 					//destination y on the canvas
 					var dy = (y-1) * TILE;
 					
-					context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE, 
-											   dx, dy, TILESET_TILE, TILESET_TILE);
+					context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE,
+							(x-startX)*TILE - offsetX, (y-1)*TILE, TILESET_TILE, TILESET_TILE);
+
 				}
+				
 				++idx;
 			}
 		}
@@ -192,6 +222,13 @@ function drawMap()
 
 var keyboard = new Keyboard();
 var player = new Player();
+var enemy = new enemy();
+var hud = new HUD();
+
+var timer = 0;
+
+var music = new Audio("background.ogg");
+music.loop = true;
 
 function run()
 {
@@ -200,13 +237,30 @@ function run()
 	
 	var deltaTime = getDeltaTime();
 	
+	timer += deltaTime;
+	
 	drawMap();
 	
 	player.update(deltaTime);
 	player.draw();
 	
+	enemy.update(deltaTime);
+	enemy.draw();
 	
-		
+	context.fillStyle = "black";
+	context.font = "64px MS Gothic";
+	
+	var timerSeconds = Math.floor(timer);
+	var timerMilliseconds = Math.floor((timer - timerSeconds) * 1000);
+	var textToDisplay = "Time: " + timerSeconds + ":" + timerMilliseconds;
+	context.fillText(textToDisplay, canvas.width - 1800, 285);
+	
+	if (player.health <= 0 )
+	{
+		player.position.set (16, 25);
+		player.health = 100;
+	}
+	
 	// update the frame counter 
 	fpsTime += deltaTime;
 	fpsCount++;
@@ -216,11 +270,15 @@ function run()
 		fps = fpsCount;
 		fpsCount = 0;
 	}		
+	
+	music.play();
 		
 	// draw the FPS
 	context.fillStyle = "#f00";
 	context.font="14px Arial";
 	context.fillText("FPS: " + fps, 5, 20, 100);
+	
+	context.drawImage(hud.image, 0,0, 1200, 600);
 }
 
 
